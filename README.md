@@ -111,7 +111,7 @@ India's education system faces a severe assessment bottleneck:
 - ⚡ **Lightning Fast**: Process hundreds of papers in minutes
 - 📈 **Detailed Reports**: Comprehensive feedback for students and teachers
 
-## 📊 Performance Metrics
+## 📊 Performance Metrics (Tentative)
 
 | Metric | Value |
 |--------|-------|
@@ -182,38 +182,6 @@ docker-compose up --build
 4. **Start Processing**: Let Scribify AI handle the rest
 5. **Download Reports**: Get detailed PDF reports for each student
 
-### API Example
-```python
-import requests
-
-# Upload answer sheet
-response = requests.post(
-    "http://localhost:8000/api/upload",
-    files={"file": open("answer_sheet.pdf", "rb")}
-)
-
-# Check grading status
-status = requests.get(f"http://localhost:8000/api/status/{response.json()['id']}")
-
-# Download results
-results = requests.get(f"http://localhost:8000/api/results/{response.json()['id']}")
-```
-
-## 📚 API Documentation
-
-Once the server is running, visit:
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
-
-### Key Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/upload` | Upload answer sheets |
-| POST | `/api/reference` | Upload reference answers |
-| GET | `/api/status/{id}` | Check processing status |
-| GET | `/api/results/{id}` | Get grading results |
-| GET | `/api/reports/{id}` | Download PDF reports |
 
 ## 🤝 Contributing
 
@@ -240,21 +208,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Lead Developer**: [Dhanas3kar](https://github.com/Dhanas3kar)
 
-## 🙏 Acknowledgments
-
-- Thanks to all educators who provided feedback during development
-- OpenAI for language model capabilities
-- The open-source community for amazing tools and libraries
-
 ## 📞 Support
 
-- 📧 Email: support@scribifyai.com
-- 💬 Discord: [Join our community](https://discord.gg/scribifyai)
+- 📧 Email: comming soon!
 - 🐛 Issues: [GitHub Issues](https://github.com/Dhanas3kar/SCRIBIFY-AI/issues)
 
 ---
 
 <div align="center">
-  <p>Made with ❤️ for educators worldwide</p>
   <p>⭐ Star this repo if you find it helpful!</p>
 </div>
