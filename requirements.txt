@@ -34,3 +34,17 @@ concurrent-log-handler>=0.9.25
 jupyterlab>=4.2.0
 notebook>=7.2.0
 ipython>=8.16.2
+
+
+langchain
+google-generativeai
+sentence-transformers
+faiss-cpu
+pymupdf
+pillow
+numpy
+reportlab
+tqdm
+opencv-python
+pandas
+python-dotenv
