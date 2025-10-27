@@ -1,0 +1,36 @@
+# ==== Core AI + LLM ====
+google-generativeai>=0.5.3
+protobuf>=5.27.2
+
+# ==== Vector DB / RAG ====
+faiss-cpu>=1.8.0
+sentence-transformers>=2.7.0
+numpy>=1.26.4
+scikit-learn>=1.5.0
+
+# ==== PDF / Image Processing ====
+PyMuPDF>=1.24.7        # (fitz)
+pillow>=10.3.0
+opencv-python>=4.10.0.84
+pdf2image>=1.17.0      # optional backup converter 
+poppler-utils>=23.05.0  # required for pdf2image
+
+
+
+# ==== Data Handling / Utils ====
+tqdm>=4.66.5
+regex>=2024.5.15
+pandas>=2.2.2
+python-dotenv>=1.0.1
+requests>=2.32.3
+
+# ==== Report Generation ====
+reportlab>=4.1.0
+
+# ==== Parallel Processing (already builtin, listed for clarity) ====
+concurrent-log-handler>=0.9.25
+
+# ==== Optional Development / Debug Tools ====
+jupyterlab>=4.2.0
+notebook>=7.2.0
+ipython>=8.16.2
