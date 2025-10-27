@@ -1,0 +1,93 @@
+{
+  "student_id": "Varsha867",
+  "questions": [
+    {
+      "part": "A",
+      "qno": 1,
+      "marks": 2,
+      "question": "Define Artificial Intelligence (AI).",
+      "answer": "Artificial intelligence means the machine can think and act like human. It can learn from data and do tasks automatically without full human help.",
+      "diagram": ""
+    },
+    {
+      "part": "A",
+      "qno": 2,
+      "marks": 2,
+      "question": "List the main types of AI.",
+      "answer": "The main types are Narrow AI, General AI and Super AI. Narrow AI is what we use now, others are still developing.",
+      "diagram": ""
+    },
+    {
+      "part": "A",
+      "qno": 3,
+      "marks": 2,
+      "question": "What is Machine Learning?",
+      "answer": "Machine learning is a part of AI where system learn from data and improve by experience. It not need to be programmed again.",
+      "diagram": ""
+    },
+    {
+      "part": "A",
+      "qno": 4,
+      "marks": 2,
+      "question": "Define Neural Networks.",
+      "answer": "Neural network is like a human brain made by layers of neurons. It used for detecting image, sound, etc.",
+      "diagram": ""
+    },
+    {
+      "part": "A",
+      "qno": 5,
+      "marks": 2,
+      "question": "What is Deep Learning?",
+      "answer": "Deep learning is a advance part of machine learning using many hidden layers. It helps in things like face recognition and speech recognition.",
+      "diagram": ""
+    },
+    {
+      "part": "B",
+      "qno": 6,
+      "marks": 6,
+      "question": "Explain the main applications of Artificial Intelligence in real-world scenarios.",
+      "answer": "AI is used in many area like health care for predicting diseases, in cars for self driving, and also in phones for voice assistant. It also used in banking for detecting fraud. In education it helps student learning faster.",
+      "diagram": ""
+    },
+    {
+      "part": "B",
+      "qno": 7,
+      "marks": 6,
+      "question": "What is Natural Language Processing? Explain its major use cases.",
+      "answer": "Natural language processing (NLP) is a method that make computer understand human language. Example are Google Translate, Chatbots and Siri. It help in communication between man and machine.",
+      "diagram": ""
+    },
+    {
+      "part": "B",
+      "qno": 8,
+      "marks": 6,
+      "question": "Discuss the major ethical concerns in AI and how they can be mitigated.",
+      "answer": "The main ethical issue is bias in data, privacy problem, and losing of jobs. To fix this, AI should be trained on fair data and must follow some law or rule. Human monitoring is also needed.",
+      "diagram": " "
+    },
+    {
+      "part": "B",
+      "qno": 9,
+      "marks": 6,
+      "question": "Describe how AI impacts the future of work with suitable examples.",
+      "answer": "AI will change job system. It will remove some manual job but also create new jobs like AI engineer. For example, robots in factory and chatbots in customer care are already replacing workers.",
+      "diagram": ""
+    },
+    {
+      "part": "B",
+      "qno": 10,
+      "marks": 6,
+      "question": "Explain the future trends and directions of Artificial Intelligence.",
+      "answer": "In future AI will become more powerful with things like explainable AI and quantum AI. Robots will be more smart and we will see AI in all fields like education, medical and even space.",
+      "diagram": ""
+    },
+    {
+      "part": "C",
+      "qno": 11,
+      "marks": 10,
+      "question": "Choose any one topic from Artificial Intelligence (e.g., NLP, Machine Learning, Deep Learning) and write a detailed essay discussing its principles, challenges, and applications in modern industries.",
+      "answer": "Machine learning is a part of AI which teach computers to learn by their own from data. It use algorithms like decision tree, regression and neural network. It is used in many industries like banking, healthcare, ecommerce. One big challenge is that it needs lot of data and powerful system. Sometimes the model overfit or not accurate because of bad data. Still it is helping to improve technology and making human life easy.",
+      "diagram": ""
+    }
+  ]
+}

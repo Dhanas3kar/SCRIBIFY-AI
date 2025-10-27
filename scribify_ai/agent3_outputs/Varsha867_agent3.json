@@ -1,0 +1,160 @@
+{
+  "student_id": "Varsha867",
+  "results": [
+    {
+      "part": "A",
+      "qno": 1,
+      "marks": 2,
+      "question": "Define Artificial Intelligence (AI).",
+      "answer": "Artificial intelligence means the machine can think and act like human. It can learn from data and do tasks automatically without full human help.",
+      "score": 2.0,
+      "feedback": {
+        "correct": "You correctly state that AI involves machines thinking and acting like humans and that they can learn from data to do tasks automatically.",
+        "wrong_or_missing": "Your definition is strong and captures the core aspects. For maximum precision, you could explicitly mention that AI is a 'simulation' of human intelligence, rather than actual human thought, and that machines are 'programmed' for this.",
+        "improvement": "For future definitions, consider adding the term 'simulation' to emphasize that AI mimics human intelligence.",
+        "reference": "Section 1: What is Artificial Intelligence (AI)?"
+      }
+    },
+    {
+      "part": "A",
+      "qno": 2,
+      "marks": 2,
+      "question": "List the main types of AI.",
+      "answer": "The main types are Narrow AI, General AI and Super AI. Narrow AI is what we use now, others are still developing.",
+      "score": 2.0,
+      "feedback": {
+        "correct": "You correctly listed all three main types of AI: Narrow AI, General AI, and Super AI. Your brief descriptions of Narrow AI being current and the others still developing are also accurate.",
+        "wrong_or_missing": "Nothing significant was wrong or missing. You provided a complete and accurate list with relevant context.",
+        "improvement": "For future questions, consider adding slightly more detail about what each type of AI entails, as provided in the textbook, if space or time allows. For example, mention that Narrow AI is specialized for specific tasks or that Super AI is beyond human intelligence.",
+        "reference": "Section 2"
+      }
+    },
+    {
+      "part": "A",
+      "qno": 3,
+      "marks": 2,
+      "question": "What is Machine Learning?",
+      "answer": "Machine learning is a part of AI where system learn from data and improve by experience. It not need to be programmed again.",
+      "score": 2.0,
+      "feedback": {
+        "correct": "The student correctly identifies Machine Learning as a subset of AI where systems learn from data and improve from experience. They also accurately state that this process occurs without explicit programming.",
+        "wrong_or_missing": "Nothing significant is wrong or missing. The student's answer fully aligns with the provided definition.",
+        "improvement": "Maintain this level of comprehensive understanding.",
+        "reference": "Question 3"
+      }
+    },
+    {
+      "part": "A",
+      "qno": 4,
+      "marks": 2,
+      "question": "Define Neural Networks.",
+      "answer": "Neural network is like a human brain made by layers of neurons. It used for detecting image, sound, etc.",
+      "score": 1.5,
+      "feedback": {
+        "correct": "You correctly identified that neural networks are inspired by the human brain, are composed of layers of neurons, and are used for tasks like image and sound detection (recognition of complex patterns).",
+        "wrong_or_missing": "Your definition is missing the key aspect that neural networks are 'computational models'. It also doesn't explicitly state that they 'process data inputs', although this is implied by their application.",
+        "improvement": "For a complete definition, remember to include that neural networks are 'computational models' and mention their role in 'processing data inputs'.",
+        "reference": "Question 4"
+      }
+    },
+    {
+      "part": "A",
+      "qno": 5,
+      "marks": 2,
+      "question": "What is Deep Learning?",
+      "answer": "Deep learning is a advance part of machine learning using many hidden layers. It helps in things like face recognition and speech recognition.",
+      "score": 2.0,
+      "feedback": {
+        "correct": "Your answer correctly identifies Deep Learning as a branch of Machine Learning that uses multi-layered neural networks (implied by 'many hidden layers'). You also provided accurate examples of its applications, such as face and speech recognition.",
+        "wrong_or_missing": "The answer is comprehensive and accurate based on the provided context.",
+        "improvement": "For maximum precision, consider using the exact phrasing 'multi-layered neural networks' as presented in the textbook.",
+        "reference": "Section 5"
+      }
+    },
+    {
+      "part": "B",
+      "qno": 6,
+      "marks": 6,
+      "question": "Explain the main applications of Artificial Intelligence in real-world scenarios.",
+      "answer": "AI is used in many area like health care for predicting diseases, in cars for self driving, and also in phones for voice assistant. It also used in banking for detecting fraud. In education it helps student learning faster.",
+      "score": 5.0,
+      "feedback": {
+        "correct": "You correctly identified several key real-world applications of AI, including disease prediction in healthcare, self-driving cars in transport, fraud detection in banking, and personalized learning in education. Your mention of voice assistants is also an accurate and relevant example of AI's use in daily technology.",
+        "wrong_or_missing": "Your answer is accurate but could have included another common application, such as recommendation systems in entertainment.",
+        "improvement": "To provide a more comprehensive explanation, you could briefly elaborate on how AI assists in one or two of these areas, or include another application like AI-powered recommendation systems.",
+        "reference": "Questions 5, 6, and 7"
+      }
+    },
+    {
+      "part": "B",
+      "qno": 7,
+      "marks": 6,
+      "question": "What is Natural Language Processing? Explain its major use cases.",
+      "answer": "Natural language processing (NLP) is a method that make computer understand human language. Example are Google Translate, Chatbots and Siri. It help in communication between man and machine.",
+      "score": 5.0,
+      "feedback": {
+        "correct": "You correctly identified Natural Language Processing (NLP) as a method for computers to understand human language. Your examples of Google Translate, Chatbots, and Siri are excellent and directly align with the major use cases mentioned in the textbook.",
+        "wrong_or_missing": "Your definition of NLP was incomplete. While you mentioned understanding, you missed that NLP also involves helping machines to interpret and generate human language. Additionally, you didn't explicitly state that NLP is a field of Artificial Intelligence.",
+        "improvement": "For a more comprehensive definition, remember to include 'interpret' and 'generate' when describing what NLP helps machines do with human language, and always clarify that it is a 'field of AI'.",
+        "reference": "Question 7"
+      }
+    },
+    {
+      "part": "B",
+      "qno": 8,
+      "marks": 6,
+      "question": "Discuss the major ethical concerns in AI and how they can be mitigated.",
+      "answer": "The main ethical issue is bias in data, privacy problem, and losing of jobs. To fix this, AI should be trained on fair data and must follow some law or rule. Human monitoring is also needed.",
+      "score": 4.0,
+      "feedback": {
+        "correct": "You correctly identified three major ethical concerns: bias in data, privacy issues, and job displacement. Your suggested mitigation strategies\u2014training AI on fair data, following laws/rules, and human monitoring\u2014are relevant and good starting points.",
+        "wrong_or_missing": "You missed some key ethical concerns mentioned in the textbook, specifically 'accountability' and 'potential misuse of AI (e.g., in surveillance or warfare)'. While your mitigation strategies are relevant, they lack specific detail and elaboration. For instance, 'following some law or rule' is broad; more specific examples of laws or ethical guidelines would strengthen the answer.",
+        "improvement": "To improve, ensure you cover all major points from the reference material. For mitigation, try to link specific solutions to specific problems (e.g., 'To address bias, implement rigorous testing and diverse data collection practices'). Also, consider the depth and specificity of your proposed solutions.",
+        "reference": "Question 8"
+      }
+    },
+    {
+      "part": "B",
+      "qno": 9,
+      "marks": 6,
+      "question": "Describe how AI impacts the future of work with suitable examples.",
+      "answer": "AI will change job system. It will remove some manual job but also create new jobs like AI engineer. For example, robots in factory and chatbots in customer care are already replacing workers.",
+      "score": 4.0,
+      "feedback": {
+        "correct": "You correctly identify that AI will lead to job displacement in some areas and create new job categories. Your examples of robots in factories and chatbots in customer care replacing workers are suitable and demonstrate understanding.",
+        "wrong_or_missing": "Your answer could be more comprehensive by explicitly mentioning that AI automates repetitive tasks and increases overall efficiency. While you mentioned AI engineers, the textbook also highlights data science and robotics as new job categories. Additionally, explicitly stating that AI can replace certain *cognitive* jobs, not just manual ones, would add precision.",
+        "improvement": "For a more complete answer, explicitly state that AI automates repetitive tasks and increases efficiency. Also, expand on the types of new jobs created, such as roles in data science and robotics, and consider mentioning the displacement of cognitive jobs.",
+        "reference": "Section 9"
+      }
+    },
+    {
+      "part": "B",
+      "qno": 10,
+      "marks": 6,
+      "question": "Explain the future trends and directions of Artificial Intelligence.",
+      "answer": "In future AI will become more powerful with things like explainable AI and quantum AI. Robots will be more smart and we will see AI in all fields like education, medical and even space.",
+      "score": 4.0,
+      "feedback": {
+        "correct": "You correctly identified explainable AI and quantum AI as future trends. Your mention of 'smart robots' aligns with the concept of AI-driven robotics, and predicting AI in 'all fields' reflects the trend of AI becoming more integrated into daily life.",
+        "wrong_or_missing": "You missed some specific future trends mentioned in the textbook, such as Edge AI and autonomous systems. While you touched on AI becoming more powerful and integrated, you could have elaborated on the specific benefits these trends bring, like increased transparency and efficiency.",
+        "improvement": "Ensure your answer includes a broader range of the specific future trends listed in the textbook, such as Edge AI and autonomous systems, and articulate their impact beyond just 'more powerful'.",
+        "reference": "Q10"
+      }
+    },
+    {
+      "part": "C",
+      "qno": 11,
+      "marks": 10,
+      "question": "Choose any one topic from Artificial Intelligence (e.g., NLP, Machine Learning, Deep Learning) and write a detailed essay discussing its principles, challenges, and applications in modern industries.",
+      "answer": "Machine learning is a part of AI which teach computers to learn by their own from data. It use algorithms like decision tree, regression and neural network. It is used in many industries like banking, healthcare, ecommerce. One big challenge is that it needs lot of data and powerful system. Sometimes the model overfit or not accurate because of bad data. Still it is helping to improve technology and making human life easy.",
+      "score": 5.0,
+      "feedback": {
+        "correct": "You correctly identified Machine Learning as a subfield of AI and accurately described its core principle of learning from data. You also mentioned relevant algorithms like decision trees, regression, and neural networks. Your identified challenges (data requirements, computational power, overfitting, and data quality) are valid for ML, and you listed appropriate industries for its application (banking, healthcare, e-commerce).",
+        "wrong_or_missing": "The primary area for improvement is the lack of detail and elaboration. The prompt asked for a 'detailed essay,' but your answer is a brief paragraph that summarizes points rather than explaining them in depth. You did not elaborate on *how* ML works in any specific industry, *why* the identified challenges are significant, or provide further context for the principles mentioned. The structure also does not resemble an essay.",
+        "improvement": "To improve, expand on each point. For principles, explain the concept of 'learning from data' further. For challenges, describe the implications of, for instance, overfitting or bad data. For applications, give specific examples of ML use within the industries you mentioned (e.g., fraud detection in banking, disease prediction in healthcare). Organize your thoughts into distinct paragraphs for principles, challenges, and applications to create a more detailed essay.",
+        "reference": "Textbook: Q1, Q3, Q4, Q6"
+      }
+    }
+  ],
+  "total_score": 36.5
+}
