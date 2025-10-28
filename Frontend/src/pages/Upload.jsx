@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 const UploadPage = () => {
   const { id } = useParams();
+<<<<<<< HEAD
   const navigate = useNavigate();
 
   // State management
@@ -94,8 +97,16 @@ const UploadPage = () => {
 
     return errors;
   };
+=======
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(false);
+>>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
 
+  // -------------------------------------------------
+  // Upload handler
+  // -------------------------------------------------
   const uploadFile = async (type, fileList) => {
+<<<<<<< HEAD
     // Clear previous errors
     setErrors(prev => ({ ...prev, [type]: null }));
 
@@ -189,10 +200,33 @@ const UploadPage = () => {
     } finally {
       setLoading(prev => ({ ...prev, [type]: false }));
       setUploadProgress(prev => ({ ...prev, [type]: 0 }));
+=======
+    if (!fileList || fileList.length === 0) return alert("Select a file");
+
+    const formData = new FormData();
+    formData.append("notebook_id", id);
+    if (type === "answers") {
+      for (let f of fileList) formData.append("files", f);
+    } else formData.append("file", fileList[0]);
+
+    try {
+      setLoading(true);
+      await axios.post(`${API_URL}/upload/${type}`, formData);
+      alert(`${type} uploaded successfully ✅`);
+    } catch (err) {
+      console.error(err);
+      alert(`Failed to upload ${type} ❌`);
+    } finally {
+      setLoading(false);
+>>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
     }
   };
 
+  // -------------------------------------------------
+  // Evaluate notebook
+  // -------------------------------------------------
   const handleEvaluate = async () => {
+<<<<<<< HEAD
     // Validation before evaluation
     if (!uploadedFiles.question) {
       showNotification('❌ Please upload question paper first', 'error');
@@ -303,8 +337,41 @@ const UploadPage = () => {
            uploadedFiles.subject && 
            uploadedFiles.answers.length > 0 &&
            evaluationStatus !== 'processing';
+=======
+    if (!id) return;
+    try {
+      setLoading(true);
+      await axios.post(`${API_URL}/evaluate/${id}`);
+      alert("Evaluation complete ✅");
+      await fetchReports();
+    } catch (err) {
+      console.error(err);
+      alert("Evaluation failed ❌");
+    } finally {
+      setLoading(false);
+    }
+>>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
   };
 
+  // -------------------------------------------------
+  // Fetch generated reports
+  // -------------------------------------------------
+  const fetchReports = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/reports/${id}`);
+      setReports(res.data);
+    } catch (err) {
+      console.warn("No reports yet");
+    }
+  };
+
+  useEffect(() => {
+    fetchReports();
+  }, [id]);
+
+  // -------------------------------------------------
+  // Styles
+  // -------------------------------------------------
   const styles = {
     container: {
       display: "grid",
@@ -327,7 +394,6 @@ const UploadPage = () => {
       textAlign: "center",
       position: "relative",
     },
-    uploadInput: { display: "none" },
     button: {
       backgroundColor: "#4f46e5",
       color: "#fff",
@@ -442,8 +508,27 @@ const UploadPage = () => {
       marginRight: "6px",
       fontWeight: "bold",
     },
+    uploadInput: { display: "none" },
+    reportItem: {
+      background: "#f3f4f6",
+      borderRadius: "8px",
+      padding: "8px 12px",
+      width: "100%",
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: "8px",
+    },
+    link: {
+      color: "#4f46e5",
+      textDecoration: "none",
+      fontWeight: "500",
+    },
   };
 
+  // -------------------------------------------------
+  // Render
+  // -------------------------------------------------
   return (
     <>
       <style>
@@ -753,7 +838,49 @@ const UploadPage = () => {
           </div>
         </div>
       </div>
+<<<<<<< HEAD
     </>
+=======
+
+      {/* Center - Source Book */}
+      <div style={styles.box}>
+        <h3>Source Book</h3>
+        <label style={styles.button}>
+          Upload
+          <input
+            type="file"
+            accept="application/pdf"
+            style={styles.uploadInput}
+            onChange={(e) => uploadFile("subject", e.target.files)}
+          />
+        </label>
+      </div>
+
+      {/* Right - Reports */}
+      <div style={styles.box}>
+        <h3>Reports</h3>
+        <button
+          style={{ ...styles.button, opacity: loading ? 0.6 : 1 }}
+          onClick={handleEvaluate}
+          disabled={loading}
+        >
+          {loading ? "Processing..." : "Evaluate"}
+        </button>
+
+        <div style={{ marginTop: "15px", width: "100%" }}>
+          {reports.length === 0 && <p>No reports yet 📄</p>}
+          {reports.map((r, i) => (
+            <div key={i} style={styles.reportItem}>
+              <span>{r.student}</span>
+              <a href={`${API_URL}${r.url}`} style={styles.link} target="_blank">
+                Download
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+>>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
   );
 };
 

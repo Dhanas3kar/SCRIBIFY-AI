@@ -114,10 +114,10 @@ const Dashboard = () => {
       {/* ---------------- Main Content ---------------- */}
       <div style={styles.main}>
         <h1 style={styles.heading}>
-          Evaluate <span style={styles.gradientText}> Anything</span>
+           Align.Analyze.<span style={styles.gradientText}>Access.</span>
         </h1>
         <p style={styles.subText}>
-          Your intelligent exam evaluation partner — upload textbooks, question papers, and student answer sheets. Scribify automatically analyzes, evaluates, and 
+          Your intelligent exam evaluation partner - upload textbooks, question papers, and student answer sheets. Scribify automatically analyzes, evaluates, and 
           generates detailed performance reports using Gemini-powered reasoning.
         </p>
       </div>

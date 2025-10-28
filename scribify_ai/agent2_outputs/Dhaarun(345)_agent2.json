@@ -1,0 +1,45 @@
+{
+  "student_id": "Dhaarun(345)",
+  "questions": [
+    {
+      "part": "A",
+      "qno": 1,
+      "marks": 10,
+      "question": "A university server needs to support multiple CPUs to run research workloads efficiently. Differentiate between symmetric and asymmetric multiprocessing. List three advantages and one disadvantage of multiprocessor systems.",
+      "answer": "",
+      "diagram": ""
+    },
+    {
+      "part": "A",
+      "qno": 2,
+      "marks": 10,
+      "question": "A developer is working on an application that uses multiple threads to improve performance. During execution, the developer notices that the performance gain is negligible compared to a single-threaded version on a multi-core system. Explain why multithreading did not provide better performance in this case. Discuss two real-life programming examples where multithreading fails to improve performance.",
+      "answer": "Multi threading:: Multi threading improves performance by dividing a task into multiple threads that execute concurrently. Reasons for Negligible performance gain:  Threads may be cpu-bound and compete for the same core resources, reducing benefits  overhead of thread creation, Synchronization  poorly designed programs may suffer from contention for shared resources Examples:  file compression,  GUI Applications.",
+      "diagram": ""
+    },
+    {
+      "part": "A",
+      "qno": 3,
+      "marks": 10,
+      "question": "A system administrator is asked to implement short-term, mid-term, and long-term scheduling policies. Describe each type with one example scenario where it is applied in real systems.",
+      "answer": "Scheduling policies: Scheduling is of three types. 1) Short-term scheduling (CPU scheduling) decides which process in the ready Queue gets the CPU next example: In a time-sharing system like a university server, Round Robin is used to give each students job equal CPU time 2) Mid-term Scheduling: Temporarily suspends or resumes processes to balance load and free resources. Example: Background research Jobs 3) Long term Scheduling (Job scheduling): Determines how many Jobs should be admitted into the system. Example: A batch system IPC Models Two fundamental IPC (Inter-process Communication) models are 1) Message passing: processes communicate by sending and receiving messages Via OS primitives example: A chat application where the server and client exchange text messages Advantage: works well in distributed system where processes are on different Machines. 2) Shared memory: Multiple processes access a common memory region for communication example: A web browser where rendering and caching processes share memory for performance Advantage: Faster communication since no kernel involvement after setup.",
+      "diagram": "    "
+    },
+    {
+      "part": "A",
+      "qno": 4,
+      "marks": 10,
+      "question": "A developer needs to implement Inter-Process Communication (IPC) between processes in a distributed environment. Explain the two fundamental IPC models with an example use-case for each.",
+      "answer": "",
+      "diagram": ""
+    },
+    {
+      "part": "A",
+      "qno": 5,
+      "marks": 10,
+      "question": "An airline reservation system requires process creation and termination management for booking, cancellation, and payment services. Summarize the steps involved in process creation and process termination in an operating system. Provide a diagram illustrating these steps.",
+      "answer": "Airline reservation System. Each service like booking, cancellation, or payment runs as a separate process in the system. Process creation!: 1) A request comes to start a new process (e.g. booking) 2) os gives memory and resource to it 3) os creates a process control block to store process details 4) The program is loaded into memory. 5) The process moves to the Ready state and waits to run. Process Termination!: 1) The process finishes its work or is cancelled 2) os frees all resources used by it 3) The parent process is informed 4) os deletes the PCB",
+      "diagram": "  "
+    }
+  ]
+}
