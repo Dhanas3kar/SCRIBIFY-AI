@@ -1,5 +1,5 @@
 # ============================================================
-# Agent 1 — Document Intelligence v5.4 (Gemini 2.5 Flash)
+# Agent 1 — Document Intelligence v5.5 (Gemini 2.5 Flash + Normalized Text)
 # ============================================================
 
 import os, json, fitz, concurrent.futures, re, time, shutil
@@ -13,6 +13,17 @@ import google.generativeai as genai
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCXUQ-6FuRqBQQwc43IEq49dvoHv9usnZ8"
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 GEMINI_MODEL = genai.GenerativeModel("gemini-2.5-flash")
+
+# -------------------------------
+# Helper — Normalize text
+# -------------------------------
+def normalize_text(text: str) -> str:
+    """Cleans raw extracted text for clarity and consistency."""
+    text = re.sub(r"\s+", " ", text.strip())           # collapse extra spaces/newlines
+    text = re.sub(r"[^\w\s.,;:?!()%-]", "", text)      # remove weird OCR characters
+    text = re.sub(r"\s([?.!,:;])", r"\1", text)        # fix space before punctuation
+    text = text.replace(" ,", ",").replace(" .", ".")
+    return text.strip()
 
 # ============================================================
 # PDF → Image
@@ -59,13 +70,19 @@ def extract_page_data(page_no: int, img_path: str):
             if isinstance(data, dict):
                 data = [data]
             for d in data:
+                # 🔹 normalize textual content
+                d["answer"] = normalize_text(d.get("answer", ""))
+                d["diagram"] = normalize_text(d.get("diagram", ""))
                 d["page_no"] = page_no
                 d["source_image"] = Path(img_path).name
             return data
         except Exception:
             time.sleep(0.5)
-    return [{"part": "", "qno": 0, "answer": "[Failed extraction]", "diagram": "",
-             "page_no": page_no, "source_image": Path(img_path).name}]
+    return [{
+        "part": "", "qno": 0,
+        "answer": "[Failed extraction]", "diagram": "",
+        "page_no": page_no, "source_image": Path(img_path).name
+    }]
 
 # ============================================================
 # Student Processor
@@ -82,6 +99,8 @@ def process_student(student_pdf: str):
             results.extend(data if isinstance(data, list) else [data])
     results = [r for r in results if isinstance(r, dict)]
     results.sort(key=lambda x: (x["page_no"], x.get("qno", 0)))
+
+    # 🔹 Merge continuation answers
     merged = []
     for r in results:
         if merged:
@@ -95,13 +114,15 @@ def process_student(student_pdf: str):
                 prev["diagram"] += " " + r["diagram"]
                 continue
         merged.append(r)
+
     results = merged
     last_part = ""
     for r in results:
-        if r["part"].strip().upper() in ["A","B","C","D"]:
+        if r["part"].strip().upper() in ["A", "B", "C", "D"]:
             last_part = r["part"].strip().upper()
         elif not r["part"] and last_part:
             r["part"] = last_part
+
     os.makedirs("agent1_outputs", exist_ok=True)
     out_path = f"agent1_outputs/{sid}_agent1.json"
     with open(out_path, "w") as f:

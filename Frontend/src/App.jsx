@@ -12,8 +12,8 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/upload" element={<Upload />} />
         <Route path="/my-notebooks" element={<MyNotebooks />} />
+        <Route path="/upload/:id" element={<Upload />} />
       </Routes>
     </BrowserRouter>
   );
