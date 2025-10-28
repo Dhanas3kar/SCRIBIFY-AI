@@ -28,7 +28,19 @@ const Login = () => {
     e.preventDefault();
     setError("");
     try {
-      await axios.post("http://localhost:8000/auth/login", form);
+      const response = await axios.post("http://localhost:8000/auth/login", form);
+      
+      // Store authentication data in localStorage
+      const userData = {
+        teacher_id: response.data.teacher_id,
+        username: response.data.username,
+        email: form.email,
+        token: response.data.access_token
+      };
+      
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", response.data.access_token);
+      
       navigate("/my-notebooks");
     } catch (err) {
       setError(err.response?.data?.detail || "Invalid email or password");

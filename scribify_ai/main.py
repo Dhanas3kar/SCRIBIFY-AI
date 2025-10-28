@@ -2,7 +2,7 @@
 # SCRIBIFY AI - Unified Backend (FastAPI + LangChain + Gemini)
 # ============================================================
 
-import os, json, shutil, uuid
+import os, json, shutil, uuid, time
 from pathlib import Path
 from typing import List
 from datetime import datetime, timedelta
@@ -25,7 +25,8 @@ DATA_DIR.mkdir(exist_ok=True)
 REPORTS_DIR = Path("reports")
 REPORTS_DIR.mkdir(exist_ok=True)
 
-DATABASE_URL = "postgresql+psycopg2://postgres:dharun123@localhost/scribify_ai"
+# URL-encode password with @ symbol: tkart@123 -> tkart%40123
+DATABASE_URL = "postgresql+psycopg2://postgres:tkart%40123@localhost/scribify_ai"
 SECRET_KEY = "scribify_secret_key"
 ALGORITHM = "HS256"
 
@@ -131,6 +132,10 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class CreateNotebookRequest(BaseModel):
+    name: str
+    teacher_id: int
+
 # ============================================================
 # AUTH ROUTES
 # ============================================================
@@ -162,15 +167,111 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 # UPLOAD ROUTES
 # ============================================================
 @app.post("/upload/create_notebook")
-def create_notebook(name: str = Form(...), teacher_id: int = Form(...), db: Session = Depends(get_db)):
-    nb = Notebook(name=name, teacher_id=teacher_id)
-    db.add(nb)
-    db.commit()
-    return {"notebook_id": nb.id, "msg": "Notebook created"}
+def create_notebook(req: CreateNotebookRequest, db: Session = Depends(get_db)):
+    try:
+        nb = Notebook(name=req.name, teacher_id=req.teacher_id)
+        db.add(nb)
+        db.commit()
+        db.refresh(nb)
+        return {"notebook_id": nb.id, "msg": "Notebook created"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, f"Failed to create notebook: {str(e)}")
+
+# ============================================================
+# NOTEBOOK MANAGEMENT ROUTES
+# ============================================================
+@app.get("/notebooks")
+def list_notebooks(teacher_id: int, db: Session = Depends(get_db)):
+    """Get all notebooks for a teacher"""
+    try:
+        notebooks = db.query(Notebook).filter(
+            Notebook.teacher_id == teacher_id
+        ).order_by(Notebook.created_at.desc()).all()
+        
+        return [
+            {
+                "id": nb.id,
+                "name": nb.name,
+                "created_at": nb.created_at.isoformat(),
+                "status": nb.status,
+                "teacher_id": nb.teacher_id,
+                "question_paper": nb.question_paper,
+                "subject_book": nb.subject_book,
+                "reports_path": nb.reports_path,
+                "answers": [
+                    {"id": ans.id, "student_name": ans.student_name} 
+                    for ans in nb.answers
+                ]
+            }
+            for nb in notebooks
+        ]
+    except Exception as e:
+        raise HTTPException(500, f"Failed to fetch notebooks: {str(e)}")
+
+
+@app.get("/notebooks/{notebook_id}")
+def get_notebook(notebook_id: int, db: Session = Depends(get_db)):
+    """Get single notebook details"""
+    nb = db.query(Notebook).filter_by(id=notebook_id).first()
+    if not nb:
+        raise HTTPException(404, "Notebook not found")
+    
+    return {
+        "id": nb.id,
+        "name": nb.name,
+        "created_at": nb.created_at.isoformat(),
+        "status": nb.status,
+        "teacher_id": nb.teacher_id,
+        "question_paper": nb.question_paper,
+        "subject_book": nb.subject_book,
+        "reports_path": nb.reports_path,
+        "answers": [
+            {
+                "id": ans.id, 
+                "student_name": ans.student_name,
+                "file_path": ans.file_path
+            } 
+            for ans in nb.answers
+        ]
+    }
+
+
+@app.delete("/notebooks/{notebook_id}")
+def delete_notebook(notebook_id: int, db: Session = Depends(get_db)):
+    """Delete a notebook and all associated files"""
+    nb = db.query(Notebook).filter_by(id=notebook_id).first()
+    if not nb:
+        raise HTTPException(404, "Notebook not found")
+    
+    try:
+        # Delete uploaded files
+        if nb.subject_book and os.path.exists(nb.subject_book):
+            os.remove(nb.subject_book)
+        if nb.question_paper and os.path.exists(nb.question_paper):
+            os.remove(nb.question_paper)
+        
+        for ans in nb.answers:
+            if os.path.exists(ans.file_path):
+                os.remove(ans.file_path)
+        
+        # Delete reports directory
+        if nb.reports_path and os.path.exists(nb.reports_path):
+            shutil.rmtree(nb.reports_path)
+        
+        # Delete from database
+        db.delete(nb)
+        db.commit()
+        
+        return {"msg": "Notebook deleted successfully"}
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(500, f"Failed to delete notebook: {str(e)}")
 
 @app.post("/upload/subject")
 def upload_subject(notebook_id: int = Form(...), file: UploadFile = None, db: Session = Depends(get_db)):
-    nb = db.query(Notebook).get(notebook_id)
+    nb = db.query(Notebook).filter_by(id=notebook_id).first()
     if not nb:
         raise HTTPException(404, "Notebook not found")
     path = DATA_DIR / f"{uuid.uuid4()}_{file.filename}"
@@ -182,7 +283,7 @@ def upload_subject(notebook_id: int = Form(...), file: UploadFile = None, db: Se
 
 @app.post("/upload/question")
 def upload_question(notebook_id: int = Form(...), file: UploadFile = None, db: Session = Depends(get_db)):
-    nb = db.query(Notebook).get(notebook_id)
+    nb = db.query(Notebook).filter_by(id=notebook_id).first()
     if not nb:
         raise HTTPException(404, "Notebook not found")
     path = DATA_DIR / f"{uuid.uuid4()}_{file.filename}"
@@ -194,7 +295,7 @@ def upload_question(notebook_id: int = Form(...), file: UploadFile = None, db: S
 
 @app.post("/upload/answers")
 def upload_answers(notebook_id: int = Form(...), files: List[UploadFile] = None, db: Session = Depends(get_db)):
-    nb = db.query(Notebook).get(notebook_id)
+    nb = db.query(Notebook).filter_by(id=notebook_id).first()
     if not nb:
         raise HTTPException(404, "Notebook not found")
 
@@ -212,37 +313,69 @@ def upload_answers(notebook_id: int = Form(...), files: List[UploadFile] = None,
 # ============================================================
 @app.post("/evaluate/{notebook_id}")
 def evaluate_notebook(notebook_id: int, db: Session = Depends(get_db)):
-    nb = db.query(Notebook).get(notebook_id)
+    nb = db.query(Notebook).filter_by(id=notebook_id).first()
     if not nb:
         raise HTTPException(404, "Notebook not found")
+
+    # Count sheets
+    sheets_count = len(nb.answers)
+    if sheets_count == 0:
+        raise HTTPException(400, "No answer sheets uploaded")
 
     nb.status = "processing"
     db.commit()
 
-    # Copy PDFs to expected locations
-    data_dir = Path("data")
-    shutil.rmtree(data_dir, ignore_errors=True)
-    (data_dir / "students").mkdir(parents=True, exist_ok=True)
-    shutil.copy(nb.subject_book, data_dir / "subject_book.pdf")
-    shutil.copy(nb.question_paper, data_dir / "question_paper.pdf")
-    for ans in nb.answers:
-        shutil.copy(ans.file_path, data_dir / "students" / Path(ans.file_path).name)
+    start_time = time.time()
+    
+    try:
+        # Copy PDFs to expected locations
+        data_dir = Path("data")
+        shutil.rmtree(data_dir, ignore_errors=True)
+        (data_dir / "students").mkdir(parents=True, exist_ok=True)
+        
+        if not nb.subject_book or not os.path.exists(nb.subject_book):
+            raise HTTPException(400, "Subject book not uploaded")
+        if not nb.question_paper or not os.path.exists(nb.question_paper):
+            raise HTTPException(400, "Question paper not uploaded")
+        
+        shutil.copy(nb.subject_book, data_dir / "subject_book.pdf")
+        shutil.copy(nb.question_paper, data_dir / "question_paper.pdf")
+        
+        for ans in nb.answers:
+            if os.path.exists(ans.file_path):
+                shutil.copy(ans.file_path, data_dir / "students" / Path(ans.file_path).name)
 
-    # Run your pipeline
-    reports_path = run_full_pipeline()
+        # Run your pipeline
+        reports_path = run_full_pipeline()
 
-    nb.status = "completed"
-    nb.reports_path = str(reports_path)
-    db.commit()
+        nb.status = "completed"
+        nb.reports_path = str(reports_path)
+        db.commit()
+        
+        processing_time = time.time() - start_time
+        cost_per_sheet = 6.50  # As defined in usage_tracker
+        total_cost = sheets_count * cost_per_sheet
 
-    return {"msg": "Evaluation complete", "reports_dir": str(reports_path)}
+        return {
+            "msg": "Evaluation complete",
+            "reports_dir": str(reports_path),
+            "sheets_processed": sheets_count,
+            "processing_time": round(processing_time, 2),
+            "cost_incurred": round(total_cost, 2),
+            "sheets_remaining": "N/A"  # Will be implemented with usage tracker
+        }
+    
+    except Exception as e:
+        nb.status = "failed"
+        db.commit()
+        raise HTTPException(500, f"Evaluation failed: {str(e)}")
 
 # ============================================================
 # REPORT ROUTES
 # ============================================================
 @app.get("/reports/{notebook_id}")
 def list_reports(notebook_id: int, db: Session = Depends(get_db)):
-    nb = db.query(Notebook).get(notebook_id)
+    nb = db.query(Notebook).filter_by(id=notebook_id).first()
     if not nb or not nb.reports_path:
         raise HTTPException(404, "No reports found")
     files = list(Path(nb.reports_path).glob("*.pdf"))
