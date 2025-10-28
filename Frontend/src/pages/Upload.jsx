@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useRef } from 'react';
 import {
   Upload as UploadIcon,
@@ -6,96 +5,83 @@ import {
   X,
   CheckCircle,
   Plus,
-  Book,
-  Users,
+  Search,
+  MessageSquare,
+  Headphones,
+  Film,
+  GitBranch,
   FileCheck,
+  StickyNote,
+  Lightbulb,
+  ChevronRight,
+  Settings,
+  Share,
+  BarChart3,
+  Menu,
+  MoreVertical,
   Sparkles,
   Cloud,
-  Loader2,
-  AlertCircle,
-  ChevronRight
+  Loader2
 } from 'lucide-react';
 
 const Upload = () => {
-  // State for three separate upload zones
-  const [questionPaper, setQuestionPaper] = useState(null);
-  const [answerScripts, setAnswerScripts] = useState([]);
-  const [sourceDocument, setSourceDocument] = useState(null);
-  
-  const [draggingZone, setDraggingZone] = useState(null);
+  // State
+  const [sources, setSources] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [completedTasks, setCompletedTasks] = useState([]);
-  
-  const questionPaperRef = useRef(null);
-  const answerScriptsRef = useRef(null);
-  const sourceDocumentRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  // Handlers for drag and drop by zone
-  const handleDragOver = (e, zone) => {
+  // Handlers
+  const handleDragOver = (e) => {
     e.preventDefault();
-    setDraggingZone(zone);
+    setIsDragging(true);
   };
 
   const handleDragLeave = (e) => {
     e.preventDefault();
-    setDraggingZone(null);
+    setIsDragging(false);
   };
 
-  const handleDrop = (e, zone) => {
+  const handleDrop = (e) => {
     e.preventDefault();
-    setDraggingZone(null);
+    setIsDragging(false);
     const files = Array.from(e.dataTransfer.files);
-    handleFiles(files, zone);
+    handleFiles(files);
   };
 
-  const handleFileSelect = (e, zone) => {
+  const handleFileSelect = (e) => {
     const files = Array.from(e.target.files);
-    handleFiles(files, zone);
+    handleFiles(files);
   };
 
-  const handleFiles = (files, zone) => {
-    const validFiles = files.filter(f => f.type === 'application/pdf');
-    
-    if (zone === 'question') {
-      if (validFiles.length > 0) {
-        setQuestionPaper({
-          id: Math.random().toString(36),
-          file: validFiles[0],
-          name: validFiles[0].name,
-          size: validFiles[0].size
-        });
-      }
-    } else if (zone === 'answer') {
-      const newAnswers = validFiles.map(file => ({
-        id: Math.random().toString(36),
-        file,
-        name: file.name,
-        size: file.size
-      }));
-      setAnswerScripts(prev => [...prev, ...newAnswers]);
-    } else if (zone === 'source') {
-      if (validFiles.length > 0) {
-        setSourceDocument({
-          id: Math.random().toString(36),
-          file: validFiles[0],
-          name: validFiles[0].name,
-          size: validFiles[0].size
-        });
-      }
-    }
+  const handleFiles = (files) => {
+    const validFiles = files.filter(f => 
+      f.type === 'application/pdf' || 
+      f.type.includes('text') || 
+      f.type.includes('video') || 
+      f.type.includes('audio')
+    );
+    setSources(prev => [...prev, ...validFiles.map(file => ({ 
+      id: Math.random().toString(36), 
+      file, 
+      name: file.name, 
+      size: file.size,
+      type: getFileType(file)
+    }))]);
   };
 
-  const removeFile = (zone, id = null) => {
-    if (zone === 'question') {
-      setQuestionPaper(null);
-    } else if (zone === 'answer' && id) {
-      setAnswerScripts(prev => prev.filter(f => f.id !== id));
-    } else if (zone === 'source') {
-      setSourceDocument(null);
-    }
+  const getFileType = (file) => {
+    if (file.type.includes('pdf')) return 'pdf';
+    if (file.type.includes('text')) return 'text';
+    if (file.type.includes('video')) return 'video';
+    if (file.type.includes('audio')) return 'audio';
+    return 'file';
+  };
+
+  const removeSource = (id) => {
+    setSources(prev => prev.filter(s => s.id !== id));
   };
 
   const formatFileSize = (bytes) => {
@@ -107,140 +93,56 @@ const Upload = () => {
   };
 
   const startProcessing = () => {
-    if (!questionPaper || answerScripts.length === 0 || !sourceDocument) {
-      return;
-    }
-    
+    if (sources.length === 0) return;
     setIsProcessing(true);
     setUploadProgress(0);
-    setCurrentStep(1);
-    setCompletedTasks([]);
 
-    const tasks = [
-      'Uploading Question Paper',
-      'Uploading Answer Scripts',
-      'Uploading Source Document',
-      'Analyzing Documents',
-      'Generating Report'
-    ];
-
-    let taskIndex = 0;
     const interval = setInterval(() => {
       setUploadProgress(prev => {
-        const newProgress = prev + 5;
-        
-        // Update completed tasks based on progress
-        if (newProgress >= 20 && taskIndex === 0) {
-          setCompletedTasks(prev => [...prev, tasks[0]]);
-          taskIndex++;
-        } else if (newProgress >= 40 && taskIndex === 1) {
-          setCompletedTasks(prev => [...prev, tasks[1]]);
-          taskIndex++;
-        } else if (newProgress >= 60 && taskIndex === 2) {
-          setCompletedTasks(prev => [...prev, tasks[2]]);
-          taskIndex++;
-        } else if (newProgress >= 80 && taskIndex === 3) {
-          setCompletedTasks(prev => [...prev, tasks[3]]);
-          taskIndex++;
-        } else if (newProgress >= 100 && taskIndex === 4) {
-          setCompletedTasks(prev => [...prev, tasks[4]]);
-          taskIndex++;
-        }
-        
-        if (newProgress >= 100) {
+        if (prev >= 100) {
           clearInterval(interval);
           setIsProcessing(false);
           setShowSuccess(true);
-          setTimeout(() => setShowSuccess(false), 4000);
+          setTimeout(() => setShowSuccess(false), 3000);
           return 100;
         }
-        return newProgress;
+        return prev + 10;
       });
-    }, 200);
-=======
-import React from "react";
-import axios from "axios";
-import { useParams } from "react-router-dom";
-
-const UploadPage = () => {
-  const { id } = useParams();
-
-  const uploadFile = async (type, fileList) => {
-    const formData = new FormData();
-    formData.append("notebook_id", id);
-    if (type === "answers") {
-      for (let f of fileList) formData.append("files", f);
-    } else formData.append("file", fileList[0]);
-
-    await axios.post(`http://localhost:8000/upload/${type}`, formData);
-    alert(`${type} uploaded successfully`);
+    }, 300);
   };
-
-  const handleEvaluate = async () => {
-    await axios.post(`http://localhost:8000/evaluate/${id}`);
-    alert("Evaluation complete ✅");
-  };
-
-  const styles = {
-    container: {
-      display: "grid",
-      gridTemplateColumns: "1fr 2fr 1fr",
-      height: "100vh",
-      gap: "20px",
-      padding: "30px",
-      backgroundColor: "#fafafa",
-      fontFamily: "'Poppins', sans-serif",
-    },
-    box: {
-      background: "#fff",
-      borderRadius: "12px",
-      padding: "20px",
-      boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      textAlign: "center",
-    },
-    uploadInput: { display: "none" },
-    button: {
-      backgroundColor: "#4f46e5",
-      color: "#fff",
-      border: "none",
-      borderRadius: "6px",
-      padding: "10px 16px",
-      cursor: "pointer",
-      marginTop: "10px",
-    },
->>>>>>> c06f751c2fdce0be08e3a9a98f4cc76449ac3e8a
-  };
-
-  const canProcess = questionPaper && answerScripts.length > 0 && sourceDocument;
 
   return (
-<<<<<<< HEAD
     <>
       <div className="min-h-screen bg-gray-50 flex flex-col">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
-          <div className="max-w-full mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">Scribify AI</h1>
-                <p className="text-xs text-gray-500">Automated Answer Script Evaluation</p>
-              </div>
-            </div>
+        <header className="bg-white border-b border-gray-200 px-4 py-3">
+          <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 border border-gray-300 rounded-lg transition-colors">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-xl font-semibold text-gray-900">Untitled notebook</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors">
+                <BarChart3 className="w-4 h-4" />
                 Analytics
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 rounded-lg transition-all shadow-md">
-                Export Results
+              <button className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors">
+                <Share className="w-4 h-4" />
+                Share
               </button>
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md cursor-pointer hover:scale-105 transition-transform">
+              <button className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors">
+                <Settings className="w-4 h-4" />
+                Settings
+              </button>
+              <button className="px-3 py-1.5 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all shadow-sm">
+                PRO
+              </button>
+              <button className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors">
+                <MoreVertical className="w-5 h-5 text-gray-600" />
+              </button>
+              <div className="w-8 h-8 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white text-sm font-medium">
                 A
               </div>
             </div>
@@ -249,438 +151,229 @@ const UploadPage = () => {
 
         {/* Success Toast */}
         {showSuccess && (
-          <div className="fixed top-24 right-8 bg-white shadow-2xl rounded-xl p-5 flex items-center gap-4 z-50 animate-in slide-in-from-right border border-emerald-400">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center">
-              <CheckCircle className="w-7 h-7 text-white" />
-            </div>
+          <div className="fixed top-20 right-6 bg-white shadow-lg rounded-xl p-4 flex items-center gap-3 z-50 animate-in slide-in-from-right">
+            <CheckCircle className="w-5 h-5 text-green-600" />
             <div>
-              <p className="font-semibold text-gray-900 text-base">Processing Complete!</p>
-              <p className="text-sm text-gray-600">All documents analyzed successfully</p>
+              <p className="font-medium text-gray-900">Sources uploaded successfully!</p>
+              <p className="text-sm text-gray-600">You can now chat with your notebook.</p>
             </div>
           </div>
         )}
 
-        {/* Main Layout - 3 Column (Sources | Upload Center | Status) */}
+        {/* Main Layout */}
         <div className="flex-1 flex overflow-hidden">
-          
-          {/* LEFT PANEL - Sources/Documents List */}
+          {/* Sources Panel */}
           <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
             <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900 mb-1">Documents</h2>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                {(questionPaper ? 1 : 0) + (answerScripts.length > 0 ? 1 : 0) + (sourceDocument ? 1 : 0)}/3 Uploaded
+              <h2 className="text-lg font-semibold text-gray-900 mb-3">Sources</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add
+                </button>
+                <button className="px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors">
+                  <Search className="w-4 h-4" />
+                  Discover
+                </button>
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.txt,.mp4,.mp3,.wav"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {/* Question Paper Section */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <FileCheck className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-sm font-semibold text-gray-900">Question Paper</h3>
-                  {questionPaper && <CheckCircle className="w-4 h-4 text-emerald-500 ml-auto" />}
-                </div>
-                {questionPaper ? (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-900 truncate">{questionPaper.name}</p>
-                        <p className="text-xs text-gray-500">{formatFileSize(questionPaper.size)}</p>
-                      </div>
-                      <button onClick={() => removeFile('question')} className="p-1 hover:bg-blue-200 rounded transition-colors">
-                        <X className="w-4 h-4 text-gray-600" />
-                      </button>
-                    </div>
+            <div className="flex-1 overflow-y-auto">
+              {sources.length === 0 ? (
+                <div className="p-8 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <FileText className="w-8 h-8 text-gray-400" />
                   </div>
-                ) : (
-                  <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
-                    <FileText className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                    <p className="text-xs text-gray-500">No file uploaded</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Answer Scripts Section */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4 text-purple-600" />
-                  <h3 className="text-sm font-semibold text-gray-900">Answer Scripts</h3>
-                  {answerScripts.length > 0 && (
-                    <>
-                      <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full ml-auto">
-                        {answerScripts.length}
-                      </span>
-                      <CheckCircle className="w-4 h-4 text-emerald-500" />
-                    </>
-                  )}
+                  <p className="text-sm text-gray-600 mb-1">Saved sources will appear here</p>
+                  <p className="text-xs text-gray-500">
+                    Click Add source above to add PDFs, websites, text, videos, or audio files. Or import a file directly from Google Drive.
+                  </p>
                 </div>
-                {answerScripts.length > 0 ? (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {answerScripts.map((script) => (
-                      <div key={script.id} className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                        <div className="flex items-center gap-2">
-                          <FileText className="w-5 h-5 text-purple-600 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-gray-900 truncate">{script.name}</p>
-                            <p className="text-xs text-gray-500">{formatFileSize(script.size)}</p>
-                          </div>
-                          <button onClick={() => removeFile('answer', script.id)} className="p-1 hover:bg-purple-200 rounded transition-colors">
-                            <X className="w-4 h-4 text-gray-600" />
-                          </button>
+              ) : (
+                <div className="p-4 space-y-3">
+                  {sources.map((source) => (
+                    <div key={source.id} className="group p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 bg-white rounded-lg border border-gray-200 flex items-center justify-center flex-shrink-0">
+                          {source.type === 'pdf' && <FileText className="w-5 h-5 text-red-600" />}
+                          {source.type === 'text' && <StickyNote className="w-5 h-5 text-blue-600" />}
+                          {source.type === 'video' && <Film className="w-5 h-5 text-purple-600" />}
+                          {source.type === 'audio' && <Headphones className="w-5 h-5 text-green-600" />}
                         </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{source.name}</p>
+                          <p className="text-xs text-gray-500">{formatFileSize(source.size)}</p>
+                        </div>
+                        <button
+                          onClick={() => removeSource(source.id)}
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-200 rounded transition-all"
+                        >
+                          <X className="w-4 h-4 text-gray-600" />
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
-                    <FileText className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                    <p className="text-xs text-gray-500">No files uploaded</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Source Document Section */}
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Book className="w-4 h-4 text-emerald-600" />
-                  <h3 className="text-sm font-semibold text-gray-900">Source Document</h3>
-                  {sourceDocument && <CheckCircle className="w-4 h-4 text-emerald-500 ml-auto" />}
-                </div>
-                {sourceDocument ? (
-                  <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-900 truncate">{sourceDocument.name}</p>
-                        <p className="text-xs text-gray-500">{formatFileSize(sourceDocument.size)}</p>
-                      </div>
-                      <button onClick={() => removeFile('source')} className="p-1 hover:bg-emerald-200 rounded transition-colors">
-                        <X className="w-4 h-4 text-gray-600" />
-                      </button>
                     </div>
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
-                    <FileText className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                    <p className="text-xs text-gray-500">No file uploaded</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Info at bottom */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-gray-600">All uploaded documents will appear here for review</p>
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* CENTER PANEL - Upload Areas */}
-          <div className="flex-1 bg-gradient-to-br from-gray-50 to-green-50 flex flex-col overflow-y-auto">
+          {/* Chat Panel */}
+          <div className="flex-1 bg-gray-50 flex flex-col">
             <div className="flex-1 flex items-center justify-center p-8">
-              <div className="w-full max-w-3xl space-y-6">
-                
-                {!isProcessing ? (
-                  <>
-                    {/* Question Paper Upload */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md">
-                          <FileCheck className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-gray-900">Question Paper</h3>
-                          <p className="text-sm text-gray-500">Upload the exam question paper (PDF only)</p>
-                        </div>
-                      </div>
-                      <div
-                        onDragOver={(e) => handleDragOver(e, 'question')}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, 'question')}
-                        className={`border-2 border-dashed rounded-xl p-8 transition-all cursor-pointer ${
-                          draggingZone === 'question'
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50'
-                        }`}
-                        onClick={() => questionPaperRef.current?.click()}
-                      >
-                        <input ref={questionPaperRef} type="file" accept=".pdf" onChange={(e) => handleFileSelect(e, 'question')} className="hidden" />
-                        <div className="text-center">
-                          <UploadIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                          <p className="text-sm font-medium text-gray-700 mb-1">
-                            {questionPaper ? '✓ Question paper uploaded' : 'Click or drag to upload question paper'}
-                          </p>
-                          <p className="text-xs text-gray-500">PDF format, max 50MB</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Answer Scripts Upload */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                          <Users className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-gray-900">Answer Scripts</h3>
-                          <p className="text-sm text-gray-500">Upload student answer sheets (Multiple PDFs allowed)</p>
-                        </div>
-                      </div>
-                      <div
-                        onDragOver={(e) => handleDragOver(e, 'answer')}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, 'answer')}
-                        className={`border-2 border-dashed rounded-xl p-8 transition-all cursor-pointer ${
-                          draggingZone === 'answer'
-                            ? 'border-purple-500 bg-purple-50'
-                            : 'border-gray-300 bg-gray-50 hover:border-purple-400 hover:bg-purple-50'
-                        }`}
-                        onClick={() => answerScriptsRef.current?.click()}
-                      >
-                        <input ref={answerScriptsRef} type="file" multiple accept=".pdf" onChange={(e) => handleFileSelect(e, 'answer')} className="hidden" />
-                        <div className="text-center">
-                          <UploadIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                          <p className="text-sm font-medium text-gray-700 mb-1">
-                            {answerScripts.length > 0 ? `✓ ${answerScripts.length} answer script(s) uploaded` : 'Click or drag to upload answer scripts'}
-                          </p>
-                          <p className="text-xs text-gray-500">PDF format, multiple files supported</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Source Document Upload */}
-                    <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md">
-                          <Book className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-gray-900">Source Document</h3>
-                          <p className="text-sm text-gray-500">Upload reference textbook or study material (PDF only)</p>
-                        </div>
-                      </div>
-                      <div
-                        onDragOver={(e) => handleDragOver(e, 'source')}
-                        onDragLeave={handleDragLeave}
-                        onDrop={(e) => handleDrop(e, 'source')}
-                        className={`border-2 border-dashed rounded-xl p-8 transition-all cursor-pointer ${
-                          draggingZone === 'source'
-                            ? 'border-emerald-500 bg-emerald-50'
-                            : 'border-gray-300 bg-gray-50 hover:border-emerald-400 hover:bg-emerald-50'
-                        }`}
-                        onClick={() => sourceDocumentRef.current?.click()}
-                      >
-                        <input ref={sourceDocumentRef} type="file" accept=".pdf" onChange={(e) => handleFileSelect(e, 'source')} className="hidden" />
-                        <div className="text-center">
-                          <UploadIcon className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-                          <p className="text-sm font-medium text-gray-700 mb-1">
-                            {sourceDocument ? '✓ Source document uploaded' : 'Click or drag to upload source document'}
-                          </p>
-                          <p className="text-xs text-gray-500">PDF format, max 50MB</p>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  /* Processing View */
-                  <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-12">
-                    <div className="text-center space-y-6">
-                      <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-                        <Loader2 className="w-10 h-10 text-white animate-spin" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Processing Documents</h3>
-                        <p className="text-gray-600">Please wait while we analyze your files...</p>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-emerald-500 to-green-600 transition-all duration-300 rounded-full"
-                            style={{ width: `${uploadProgress}%` }}
-                          />
-                        </div>
-                        <p className="text-sm font-semibold text-gray-700">{uploadProgress}% Complete</p>
-                      </div>
-                    </div>
+              {isProcessing ? (
+                <div className="text-center space-y-6 max-w-md">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
                   </div>
-                )}
-              </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Processing your sources...</h3>
+                    <p className="text-sm text-gray-600 mt-1">This may take a few moments</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-600">{uploadProgress}%</p>
+                  </div>
+                </div>
+              ) : sources.length === 0 ? (
+                <div className="text-center max-w-md">
+                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <MessageSquare className="w-10 h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Add a source to get started</h3>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-4 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm"
+                  >
+                    Upload a source
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center max-w-md">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <Lightbulb className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Your notebook is ready!</h3>
+                  <p className="text-sm text-gray-600 mb-6">Ask questions, generate audio overviews, or create study materials.</p>
+                  <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-medium hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm">
+                    Start chatting
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Bottom Action Bar */}
-            {!isProcessing && canProcess && (
-              <div className="p-6 bg-white border-t border-gray-200">
-                <div className="max-w-3xl mx-auto">
+            {sources.length > 0 && !isProcessing && (
+              <div className="p-4 border-t border-gray-200 bg-white">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">{sources.length} sources</span>
                   <button
                     onClick={startProcessing}
-                    className="w-full py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-base font-bold rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.01] flex items-center justify-center gap-3"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-700 transition-all shadow-sm flex items-center gap-2"
                   >
-                    <Sparkles className="w-6 h-6" />
-                    Start Evaluation Process
+                    <Sparkles className="w-4 h-4" />
+                    Generate insights
                   </button>
                 </div>
               </div>
             )}
           </div>
 
-          {/* RIGHT PANEL - Task Progress & Status */}
+          {/* Studio Panel */}
           <div className="w-80 bg-white border-l border-gray-200 flex flex-col">
             <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Processing Status</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Studio</h2>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 p-6">
               <div className="space-y-4">
-                {/* Processing Status Card */}
-                {!isProcessing && !canProcess && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 text-center">
-                    <AlertCircle className="w-10 h-10 text-blue-600 mx-auto mb-3" />
-                    <p className="text-sm font-semibold text-gray-900 mb-1">Upload Required Documents</p>
-                    <p className="text-xs text-gray-600">Please upload all three documents to begin processing</p>
-                  </div>
-                )}
-
-                {!isProcessing && canProcess && (
-                  <div className="bg-emerald-50 border border-emerald-400 rounded-xl p-5 text-center">
-                    <CheckCircle className="w-10 h-10 text-emerald-600 mx-auto mb-3" />
-                    <p className="text-sm font-semibold text-gray-900 mb-1">Ready to Process</p>
-                    <p className="text-xs text-gray-600">All documents uploaded. Click the button below to start.</p>
-                  </div>
-                )}
-
-                {/* Task Progress List */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Task Progress</h3>
-                  <div className="space-y-2">
-                    {[
-                      { label: 'Upload Question Paper', icon: FileCheck, color: 'blue' },
-                      { label: 'Upload Answer Scripts', icon: Users, color: 'purple' },
-                      { label: 'Upload Source Document', icon: Book, color: 'emerald' },
-                      { label: 'Analyze Documents', icon: Sparkles, color: 'yellow' },
-                      { label: 'Generate Report', icon: FileText, color: 'green' },
-                    ].map((task, index) => {
-                      const isCompleted = completedTasks.includes(task.label);
-                      const isCurrent = isProcessing && index === completedTasks.length;
-                      
-                      return (
-                        <div
-                          key={index}
-                          className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                            isCompleted
-                              ? 'bg-emerald-50 border-emerald-300'
-                              : isCurrent
-                              ? 'bg-blue-50 border-blue-300 animate-pulse'
-                              : 'bg-gray-50 border-gray-200'
-                          }`}
-                        >
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                            isCompleted ? 'bg-emerald-500' : isCurrent ? `bg-${task.color}-500` : 'bg-gray-300'
-                          }`}>
-                            {isCompleted ? (
-                              <CheckCircle className="w-5 h-5 text-white" />
-                            ) : (
-                              <task.icon className={`w-5 h-5 ${isCurrent ? 'text-white' : 'text-gray-500'}`} />
-                            )}
-                          </div>
-                          <p className={`text-xs font-medium flex-1 ${isCompleted || isCurrent ? 'text-gray-900' : 'text-gray-500'}`}>
-                            {task.label}
-                          </p>
-                          {isCurrent && <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />}
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                  <p className="text-sm font-medium text-gray-900 mb-1">Create an Audio Overview in:</p>
+                  <p className="text-xs text-gray-600">हिन्दी, বাংলা, മലയാളം, मराठी, தமிழ், తెలుగు, తెలుగు</p>
                 </div>
 
-                {/* Completion Message */}
-                {completedTasks.length === 5 && (
-                  <div className="bg-gradient-to-br from-emerald-50 to-green-50 border-2 border-emerald-400 rounded-xl p-5">
-                    <div className="text-center">
-                      <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <CheckCircle className="w-7 h-7 text-white" />
-                      </div>
-                      <p className="text-sm font-bold text-gray-900 mb-1">All Tasks Completed!</p>
-                      <p className="text-xs text-gray-600">Your evaluation report is ready</p>
-                    </div>
-                  </div>
-                )}
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { icon: Headphones, label: 'Audio Overview', color: 'blue' },
+                    { icon: Film, label: 'Video Overview', color: 'purple' },
+                    { icon: GitBranch, label: 'Mind Map', color: 'green' },
+                    { icon: FileCheck, label: 'Reports', color: 'orange' },
+                    { icon: StickyNote, label: 'Flashcards', color: 'pink' },
+                    { icon: Lightbulb, label: 'Quiz', color: 'indigo' },
+                  ].map((item, i) => (
+                    <button
+                      key={i}
+                      disabled={sources.length === 0}
+                      className={`p-4 rounded-xl border-2 border-dashed transition-all flex flex-col items-center gap-2 ${
+                        sources.length === 0
+                          ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                          : `border-${item.color}-200 bg-${item.color}-50 hover:border-${item.color}-300 hover:bg-${item.color}-100 text-${item.color}-700`
+                      }`}
+                    >
+                      <item.icon className="w-6 h-6" />
+                      <span className="text-xs font-medium">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mt-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <p className="text-xs text-gray-600">
+                    <strong>Studio output will be saved here.</strong><br />
+                    After adding sources, click to add Audio Overview, Study Guide, Mind Map, and more!
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Bottom Info */}
-            <div className="p-4 border-t border-gray-200 bg-gradient-to-br from-blue-50 to-purple-50">
-              <div className="space-y-2">
-                <p className="text-xs font-semibold text-gray-900">Document Requirements:</p>
-                <ul className="text-xs text-gray-600 space-y-1 ml-3">
-                  <li>• PDF format only</li>
-                  <li>• Max file size: 50MB</li>
-                  <li>• Multiple answer scripts OK</li>
-                  <li>• Clear, readable quality</li>
-                </ul>
-              </div>
+            <div className="p-4 border-t border-gray-200">
+              <button className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl font-medium text-gray-700 transition-colors flex items-center justify-center gap-2">
+                <StickyNote className="w-5 h-5" />
+                Add note
+              </button>
             </div>
           </div>
         </div>
-=======
-    <div style={styles.container}>
-      {/* Left - Question + Answers */}
-      <div>
-        <div style={styles.box}>
-          <h3>Question Paper</h3>
-          <label style={styles.button}>
-            Upload
-            <input
-              type="file"
-              accept="application/pdf"
-              style={styles.uploadInput}
-              onChange={(e) => uploadFile("question", e.target.files)}
-            />
-          </label>
+
+        {/* Footer Note */}
+        <div className="bg-white border-t border-gray-200 px-6 py-3">
+          <p className="text-xs text-gray-500 text-center">
+
+          </p>
         </div>
-
-        <div style={{ ...styles.box, marginTop: "20px" }}>
-          <h3>Student Answers</h3>
-          <label style={styles.button}>
-            Upload
-            <input
-              type="file"
-              multiple
-              accept="application/pdf"
-              style={styles.uploadInput}
-              onChange={(e) => uploadFile("answers", e.target.files)}
-            />
-          </label>
-        </div>
->>>>>>> c06f751c2fdce0be08e3a9a98f4cc76449ac3e8a
       </div>
 
-      {/* Center - Source Book */}
-      <div style={styles.box}>
-        <h3>Source Book</h3>
-        <label style={styles.button}>
-          Upload
-          <input
-            type="file"
-            accept="application/pdf"
-            style={styles.uploadInput}
-            onChange={(e) => uploadFile("subject", e.target.files)}
-          />
-        </label>
-      </div>
-
-      {/* Right - Reports */}
-      <div style={styles.box}>
-        <h3>Reports</h3>
-        <button style={styles.button} onClick={handleEvaluate}>
-          Evaluate
-        </button>
-      </div>
-    </div>
+      <style jsx>{`
+        @keyframes slide-in-from-right {
+          from {
+            opacity: 0;
+            transform: translateX(100%);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        .animate-in {
+          animation: slide-in-from-right 0.3s ease-out;
+        }
+      `}</style>
+    </>
   );
 };
 
-export default UploadPage;
+export default Upload;
