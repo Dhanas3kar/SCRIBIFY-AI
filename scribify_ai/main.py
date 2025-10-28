@@ -11,10 +11,11 @@ import google.generativeai as genai
 from fastapi import FastAPI, UploadFile, Form, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime, Text
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship, Session
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from pydantic import BaseModel
 
 # ------------------------------------------------------------
 # CONFIG + PATHS
@@ -48,6 +49,7 @@ class Teacher(Base):
     __tablename__ = "teachers"
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True)
+    username = Column(String, unique=True, index=True)
     password_hash = Column(String)
     notebooks = relationship("Notebook", back_populates="teacher")
 
@@ -79,8 +81,10 @@ Base.metadata.create_all(bind=engine)
 # ------------------------------------------------------------
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def hash_password(password: str):
-    return pwd_context.hash(password)
+def hash_password(password: str) -> str:
+    # bcrypt only supports passwords up to 72 bytes
+    return pwd_context.hash(password[:72])
+
 
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
@@ -115,25 +119,44 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"]
 )
 
+# ------------------------------------------------------------
+# SCHEMAS
+# ------------------------------------------------------------
+class RegisterRequest(BaseModel):
+    email: str
+    username: str
+    password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 # ============================================================
 # AUTH ROUTES
 # ============================================================
 @app.post("/auth/register")
-def register(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-    if db.query(Teacher).filter(Teacher.email == email).first():
+def register(req: RegisterRequest, db: Session = Depends(get_db)):
+    if db.query(Teacher).filter(Teacher.email == req.email).first():
         raise HTTPException(400, "Email already registered")
-    teacher = Teacher(email=email, password_hash=hash_password(password))
+    if db.query(Teacher).filter(Teacher.username == req.username).first():
+        raise HTTPException(400, "Username already taken")
+
+    teacher = Teacher(
+        email=req.email,
+        username=req.username,
+        password_hash=hash_password(req.password)
+    )
     db.add(teacher)
     db.commit()
     return {"msg": "Registered successfully"}
 
 @app.post("/auth/login")
-def login(email: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-    teacher = db.query(Teacher).filter(Teacher.email == email).first()
-    if not teacher or not verify_password(password, teacher.password_hash):
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    teacher = db.query(Teacher).filter(Teacher.email == req.email).first()
+    if not teacher or not verify_password(req.password, teacher.password_hash):
         raise HTTPException(401, "Invalid credentials")
     token = create_token({"sub": teacher.email})
-    return {"access_token": token, "teacher_id": teacher.id}
+    return {"access_token": token, "teacher_id": teacher.id, "username": teacher.username}
 
 # ============================================================
 # UPLOAD ROUTES
@@ -148,9 +171,11 @@ def create_notebook(name: str = Form(...), teacher_id: int = Form(...), db: Sess
 @app.post("/upload/subject")
 def upload_subject(notebook_id: int = Form(...), file: UploadFile = None, db: Session = Depends(get_db)):
     nb = db.query(Notebook).get(notebook_id)
-    if not nb: raise HTTPException(404, "Notebook not found")
+    if not nb:
+        raise HTTPException(404, "Notebook not found")
     path = DATA_DIR / f"{uuid.uuid4()}_{file.filename}"
-    with open(path, "wb") as f: f.write(file.file.read())
+    with open(path, "wb") as f:
+        f.write(file.file.read())
     nb.subject_book = str(path)
     db.commit()
     return {"msg": "Subject book uploaded", "path": str(path)}
@@ -158,9 +183,11 @@ def upload_subject(notebook_id: int = Form(...), file: UploadFile = None, db: Se
 @app.post("/upload/question")
 def upload_question(notebook_id: int = Form(...), file: UploadFile = None, db: Session = Depends(get_db)):
     nb = db.query(Notebook).get(notebook_id)
-    if not nb: raise HTTPException(404, "Notebook not found")
+    if not nb:
+        raise HTTPException(404, "Notebook not found")
     path = DATA_DIR / f"{uuid.uuid4()}_{file.filename}"
-    with open(path, "wb") as f: f.write(file.file.read())
+    with open(path, "wb") as f:
+        f.write(file.file.read())
     nb.question_paper = str(path)
     db.commit()
     return {"msg": "Question paper uploaded", "path": str(path)}
@@ -168,11 +195,13 @@ def upload_question(notebook_id: int = Form(...), file: UploadFile = None, db: S
 @app.post("/upload/answers")
 def upload_answers(notebook_id: int = Form(...), files: List[UploadFile] = None, db: Session = Depends(get_db)):
     nb = db.query(Notebook).get(notebook_id)
-    if not nb: raise HTTPException(404, "Notebook not found")
+    if not nb:
+        raise HTTPException(404, "Notebook not found")
 
     for file in files:
         path = DATA_DIR / f"{uuid.uuid4()}_{file.filename}"
-        with open(path, "wb") as f: f.write(file.file.read())
+        with open(path, "wb") as f:
+            f.write(file.file.read())
         db.add(AnswerPaper(student_name=file.filename.split(".")[0], file_path=str(path), notebook_id=nb.id))
 
     db.commit()
@@ -233,4 +262,4 @@ def download_report(filename: str):
 def root():
     return {"msg": "Welcome to Scribify AI Backend 🚀"}
 
-#uvicorn main:app --reload
+# Run: uvicorn main:app --reload
