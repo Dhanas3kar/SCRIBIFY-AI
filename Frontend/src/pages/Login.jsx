@@ -29,7 +29,7 @@ const Login = () => {
     setError("");
     try {
       await axios.post("http://localhost:8000/auth/login", form);
-      navigate("/dashboard");
+      navigate("/my-notebooks");
     } catch (err) {
       setError(err.response?.data?.detail || "Invalid email or password");
     }
