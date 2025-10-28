@@ -1,5 +1,5 @@
 # ============================================================
-# SCRIBIFY AI - Unified Backend (LangChain + Gemini + PostgreSQL)
+# SCRIBIFY AI - Unified Backend (FastAPI + LangChain + Gemini)
 # ============================================================
 
 import os, json, shutil, uuid, time
@@ -17,12 +17,12 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
+# ------------------------------------------------------------
+# CONFIG + PATHS
+# ------------------------------------------------------------
 DATA_DIR = Path("data")
-REPORTS_DIR = Path("reports")
 DATA_DIR.mkdir(exist_ok=True)
+REPORTS_DIR = Path("reports")
 REPORTS_DIR.mkdir(exist_ok=True)
 
 # URL-encode password with @ symbol: tkart@123 -> tkart%40123
@@ -33,16 +33,19 @@ ALGORITHM = "HS256"
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCXUQ-6FuRqBQQwc43IEq49dvoHv9usnZ8"
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
-# Import the unified LangChain pipeline
+# Import from your existing LangChain brain
 from brain import run_full_pipeline
 
-# ============================================================
-# DATABASE
-# ============================================================
+# ------------------------------------------------------------
+# DB SETUP
+# ------------------------------------------------------------
 Base = declarative_base()
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
+# ------------------------------------------------------------
+# MODELS
+# ------------------------------------------------------------
 class Teacher(Base):
     __tablename__ = "teachers"
     id = Column(Integer, primary_key=True, index=True)
@@ -74,13 +77,15 @@ class AnswerPaper(Base):
 
 Base.metadata.create_all(bind=engine)
 
-# ============================================================
-# UTILS
-# ============================================================
+# ------------------------------------------------------------
+# AUTH SETUP
+# ------------------------------------------------------------
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def hash_password(password: str):
+def hash_password(password: str) -> str:
+    # bcrypt only supports passwords up to 72 bytes
     return pwd_context.hash(password[:72])
+
 
 def verify_password(plain, hashed):
     return pwd_context.verify(plain, hashed)
@@ -91,6 +96,13 @@ def create_token(data: dict, expires=60):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+def decode_token(token: str):
+    try:
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# Dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -98,22 +110,19 @@ def get_db():
     finally:
         db.close()
 
-# ============================================================
-# FASTAPI APP
-# ============================================================
-app = FastAPI(title="Scribify AI Backend", version="1.2")
-
+# ------------------------------------------------------------
+# FASTAPI APP INIT
+# ------------------------------------------------------------
+app = FastAPI(title="Scribify AI Backend", version="1.0")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"], allow_credentials=True,
+    allow_methods=["*"], allow_headers=["*"]
 )
 
-# ============================================================
-# AUTH ROUTES
-# ============================================================
+# ------------------------------------------------------------
+# SCHEMAS
+# ------------------------------------------------------------
 class RegisterRequest(BaseModel):
     email: str
     username: str
@@ -123,7 +132,6 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
-<<<<<<< HEAD
 class CreateNotebookRequest(BaseModel):
     name: str
     teacher_id: int
@@ -131,8 +139,6 @@ class CreateNotebookRequest(BaseModel):
 # ============================================================
 # AUTH ROUTES
 # ============================================================
-=======
->>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
 @app.post("/auth/register")
 def register(req: RegisterRequest, db: Session = Depends(get_db)):
     if db.query(Teacher).filter(Teacher.email == req.email).first():
@@ -155,30 +161,12 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
     if not teacher or not verify_password(req.password, teacher.password_hash):
         raise HTTPException(401, "Invalid credentials")
     token = create_token({"sub": teacher.email})
-    return {
-        "access_token": token,
-        "teacher_id": teacher.id,
-        "username": teacher.username,
-    }
+    return {"access_token": token, "teacher_id": teacher.id, "username": teacher.username}
 
 # ============================================================
-# NOTEBOOK ROUTES
+# UPLOAD ROUTES
 # ============================================================
-@app.get("/notebooks")
-def list_notebooks(db: Session = Depends(get_db)):
-    notebooks = db.query(Notebook).order_by(Notebook.created_at.desc()).all()
-    return [
-        {
-            "id": nb.id,
-            "name": nb.name,
-            "created_at": nb.created_at.isoformat(),
-            "status": nb.status,
-        }
-        for nb in notebooks
-    ]
-
 @app.post("/upload/create_notebook")
-<<<<<<< HEAD
 def create_notebook(req: CreateNotebookRequest, db: Session = Depends(get_db)):
     try:
         nb = Notebook(name=req.name, teacher_id=req.teacher_id)
@@ -280,80 +268,48 @@ def delete_notebook(notebook_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(500, f"Failed to delete notebook: {str(e)}")
-=======
-def create_notebook(name: str = Form(...), teacher_id: int = Form(...), db: Session = Depends(get_db)):
-    nb = Notebook(name=name, teacher_id=teacher_id)
-    db.add(nb)
-    db.commit()
-    db.refresh(nb)
-    return {"notebook_id": nb.id, "msg": "Notebook created"}
->>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
 
-# ============================================================
-# FILE UPLOADS
-# ============================================================
 @app.post("/upload/subject")
 def upload_subject(notebook_id: int = Form(...), file: UploadFile = None, db: Session = Depends(get_db)):
-<<<<<<< HEAD
     nb = db.query(Notebook).filter_by(id=notebook_id).first()
     if not nb:
         raise HTTPException(404, "Notebook not found")
-=======
-    nb = db.query(Notebook).get(notebook_id)
-    if not nb: raise HTTPException(404, "Notebook not found")
-
->>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
     path = DATA_DIR / f"{uuid.uuid4()}_{file.filename}"
-    with open(path, "wb") as f: f.write(file.file.read())
-
+    with open(path, "wb") as f:
+        f.write(file.file.read())
     nb.subject_book = str(path)
     db.commit()
     return {"msg": "Subject book uploaded", "path": str(path)}
 
 @app.post("/upload/question")
 def upload_question(notebook_id: int = Form(...), file: UploadFile = None, db: Session = Depends(get_db)):
-<<<<<<< HEAD
     nb = db.query(Notebook).filter_by(id=notebook_id).first()
     if not nb:
         raise HTTPException(404, "Notebook not found")
-=======
-    nb = db.query(Notebook).get(notebook_id)
-    if not nb: raise HTTPException(404, "Notebook not found")
-
->>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
     path = DATA_DIR / f"{uuid.uuid4()}_{file.filename}"
-    with open(path, "wb") as f: f.write(file.file.read())
-
+    with open(path, "wb") as f:
+        f.write(file.file.read())
     nb.question_paper = str(path)
     db.commit()
     return {"msg": "Question paper uploaded", "path": str(path)}
 
 @app.post("/upload/answers")
 def upload_answers(notebook_id: int = Form(...), files: List[UploadFile] = None, db: Session = Depends(get_db)):
-<<<<<<< HEAD
     nb = db.query(Notebook).filter_by(id=notebook_id).first()
     if not nb:
         raise HTTPException(404, "Notebook not found")
-=======
-    nb = db.query(Notebook).get(notebook_id)
-    if not nb: raise HTTPException(404, "Notebook not found")
->>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
 
-    uploaded = 0
     for file in files:
         path = DATA_DIR / f"{uuid.uuid4()}_{file.filename}"
-        with open(path, "wb") as f: f.write(file.file.read())
-        db.add(AnswerPaper(
-            student_name=file.filename.split(".")[0],
-            file_path=str(path),
-            notebook_id=nb.id,
-        ))
-        uploaded += 1
+        with open(path, "wb") as f:
+            f.write(file.file.read())
+        db.add(AnswerPaper(student_name=file.filename.split(".")[0], file_path=str(path), notebook_id=nb.id))
+
     db.commit()
-    return {"msg": f"{uploaded} answer(s) uploaded successfully"}
+    return {"msg": f"{len(files)} student answer(s) uploaded"}
 
 # ============================================================
-# EVALUATION (LangChain Pipeline)
+# EVALUATION ROUTE
 # ============================================================
 @app.post("/evaluate/{notebook_id}")
 def evaluate_notebook(notebook_id: int, db: Session = Depends(get_db)):
@@ -369,7 +325,6 @@ def evaluate_notebook(notebook_id: int, db: Session = Depends(get_db)):
     nb.status = "processing"
     db.commit()
 
-<<<<<<< HEAD
     start_time = time.time()
     
     try:
@@ -392,20 +347,6 @@ def evaluate_notebook(notebook_id: int, db: Session = Depends(get_db)):
 
         # Run your pipeline
         reports_path = run_full_pipeline()
-=======
-    # Prepare directories for the pipeline
-    shutil.rmtree("data", ignore_errors=True)
-    (Path("data") / "students").mkdir(parents=True, exist_ok=True)
-
-    shutil.copy(nb.subject_book, "data/subject_book.pdf")
-    shutil.copy(nb.question_paper, "data/question_paper.pdf")
-
-    for ans in nb.answers:
-        shutil.copy(ans.file_path, f"data/students/{Path(ans.file_path).name}")
-
-    # Run your full evaluation pipeline
-    reports_path = run_full_pipeline()
->>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
 
         nb.status = "completed"
         nb.reports_path = str(reports_path)
@@ -415,7 +356,6 @@ def evaluate_notebook(notebook_id: int, db: Session = Depends(get_db)):
         cost_per_sheet = 6.50  # As defined in usage_tracker
         total_cost = sheets_count * cost_per_sheet
 
-<<<<<<< HEAD
         return {
             "msg": "Evaluation complete",
             "reports_dir": str(reports_path),
@@ -429,12 +369,9 @@ def evaluate_notebook(notebook_id: int, db: Session = Depends(get_db)):
         nb.status = "failed"
         db.commit()
         raise HTTPException(500, f"Evaluation failed: {str(e)}")
-=======
-    return {"msg": "Evaluation complete ✅", "reports_dir": str(reports_path)}
->>>>>>> aa8d4836cdb9760d7ff5f8259677b8f95d7727fc
 
 # ============================================================
-# REPORTS
+# REPORT ROUTES
 # ============================================================
 @app.get("/reports/{notebook_id}")
 def list_reports(notebook_id: int, db: Session = Depends(get_db)):
@@ -457,3 +394,5 @@ def download_report(filename: str):
 @app.get("/")
 def root():
     return {"msg": "Welcome to Scribify AI Backend 🚀"}
+
+# Run: uvicorn main:app --reload
